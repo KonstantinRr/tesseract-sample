@@ -35,7 +35,7 @@ def convert(source, output):
     images = (convert_from_path(source) if isinstance(source, str) else
         convert_from_bytes(source.read()))
     
-    pdfs = [pyt.image_to_pdf_or_hocr(image, extension='pdf', lang='eng+rus') for image in images]
+    pdfs = [pyt.image_to_pdf_or_hocr(image, extension='pdf', lang='nld') for image in images]
     pdfsIO = [BytesIO(pdf) for pdf in pdfs]
 
     if isinstance(output, str):
@@ -45,7 +45,7 @@ def convert(source, output):
         pdfConcat(pdfsIO, output)
 
 if __name__ == '__main__':
-    if sys.platform == "win32":        # First open all the files, then produce the output file, and
+    if sys.platform == 'win32':        # First open all the files, then produce the output file, and
         # finally close the input files. This is necessary because
         # the data isn't read from the input files until the write
         # operation. Thanks to
@@ -53,9 +53,24 @@ if __name__ == '__main__':
         import os, msvcrt
         msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
-    inputImages = ['inp/Abnahme der Leistungen.pdf', 'inp/Vertrag.pdf']
-    for idx, i in enumerate(inputImages):
-        convert(i, f'{idx}.pdf')
+    from pathlib import Path
+    from os import listdir
+    from os.path import isfile, join
+
+    inputDir = 'input'
+    outputDir = 'output'
+
+    try:
+        Path(inputDir).mkdir(parents=True, exist_ok=True)
+        Path(outputDir).mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        print(f'Could not create input/output directories {e}')
+        sys.exit(1)
+
+    onlyfiles = [f for f in listdir('input') if isfile(join(inputDir, f))]
+    for idx, i in enumerate(onlyfiles):
+        print(f'Converting {idx}: {i}')
+        convert(join(inputDir, i), join(outputDir, i))
 
 
     
